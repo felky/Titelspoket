@@ -2,6 +2,8 @@ body, html {
     background-image: url("img/difVinner.jpg");
     background-size: cover;
     overflow: hidden;
+    height: 100%;
+    margin: auto, 0;
 }
 
 #mainText {
@@ -47,14 +49,29 @@ body, html {
     border-color: white;
 }
 
-#kaffeKnappen{
-    height: auto;
-    width: 100px;
-    display: block;
-    margin: auto;
-    bottom: 10px;
-}
-
 a {
     text-decoration: none;
 }
+
+
+@media screen and (max-width: 600px) { 
+
+    body {
+        background-image: url("img/difVinnerMobile.jpg");
+        background-repeat: no-repeat;
+    }
+
+    #mainText {
+        margin-top: 70%;
+    }
+    
+    #lennarten {
+        width:220px;
+        height: auto;
+        display: block;
+        position: absolute;
+        left: 30%;
+        top: 6%;
+    }
+    
+} 
