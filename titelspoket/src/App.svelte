@@ -30,7 +30,7 @@
 
 <style>
     .lennarten {
-      height: 25rem;
+      height: 20rem;
     }
 
     .main-text {
