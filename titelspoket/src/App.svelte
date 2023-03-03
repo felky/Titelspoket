@@ -4,13 +4,13 @@
 
   const lastVictory: number = Date.parse("2001-10-21");
 
- 
-  let days: number = 0;
-  let years: number = 0;
-  let seconds: number = 0;
+  let dateSinceWin: number = Date.now() - lastVictory;
+  let days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
+  let years = Math.round(days / 365);
+  let seconds = Math.round(dateSinceWin / 1000);
 
   setInterval(() => {
-    const dateSinceWin: number = Date.now() - lastVictory;
+    dateSinceWin = Date.now() - lastVictory;
     days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
     years = Math.round(days / 365);
     seconds = Math.round(dateSinceWin / 1000);
