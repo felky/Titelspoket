@@ -31,7 +31,6 @@ body {
   min-height: 100vh;
   background-image: url('./assets/difVinner.jpg');
   background-size: cover;
-  overflow: hidden;
 }
 
 h1 {
