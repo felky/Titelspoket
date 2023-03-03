@@ -31,6 +31,10 @@
       height: 20rem;
     }
 
+    p {
+      font-family: 'Consolas';
+    }
+
     .main-text {
     user-select: none;
     width: 300px;
