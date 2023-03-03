@@ -24,8 +24,6 @@
       <p>...dagar sedan bajen vann Allsvenskan.</p>
       <p>Det är alltså <b>{ years } år</b> sedan.</p>
       <p>Eller hela <b>{seconds}</b> sekunder sen. Illa!</p>
-
-      <audio id="player" autoplay controls loop style="display: block;"><source src="{ heyJude }" type="audio/mp3"></audio>
 </main>
 
 <style>
