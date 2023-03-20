@@ -8,6 +8,7 @@
   let dateSinceWin: number = Date.now() - lastVictory;
   let dateSinceDifWin: number = Date.now() - lastDifVictory;
   let daysDifWin: number = Math.round(dateSinceDifWin / (1000 * 60 * 60 * 24));
+  let yearsDifWin: number = Math.round(daysDifWin / 365);
   let days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
   let years = Math.round(days / 365);
   let seconds = Math.round(dateSinceWin / 1000);
@@ -19,6 +20,7 @@
     daysDifWin = Math.round(dateSinceDifWin / (1000 * 60 * 60 * 24))
     days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
     years = Math.round(days / 365);
+    yearsDifWin = Math.round(daysDifWin / 365);
     seconds = Math.round(dateSinceWin / 1000);
   }, 1000);
 
@@ -30,8 +32,10 @@
       <p>...dagar sedan bajen vann Allsvenskan.</p>
       <p>Det är alltså <b>{ years } år</b> sedan.</p>
       <p>Eller hela <b>{seconds}</b> sekunder sen. Illa!</p>
+      <br />
       <p>Tror du på derbyspöken? Det gör bajen. </p>
       <p>Vraken vann senast över <b>Djurgår'n</b> för <b>{ daysDifWin }</b> dagar sedan!</p>
+      <p><i>*host host*</i> alltså <b>{ yearsDifWin } år</b> sedan.</p>
 </main>
 
 <style>
