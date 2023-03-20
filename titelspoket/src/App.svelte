@@ -3,14 +3,20 @@
   import heyJude from './assets/heyDif.mp3';
 
   const lastVictory: number = Date.parse("2001-10-21");
+  const lastDifVictory: number = Date.parse("2021-04-04")
 
   let dateSinceWin: number = Date.now() - lastVictory;
+  let dateSinceDifWin: number = Date.now() - lastDifVictory;
+  let daysDifWin: number = Math.round(dateSinceDifWin / (1000 * 60 * 60 * 24));
   let days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
   let years = Math.round(days / 365);
   let seconds = Math.round(dateSinceWin / 1000);
 
+
   setInterval(() => {
     dateSinceWin = Date.now() - lastVictory;
+    dateSinceDifWin = Date.now() - lastDifVictory;
+    daysDifWin = Math.round(dateSinceDifWin / (1000 * 60 * 60 * 24))
     days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
     years = Math.round(days / 365);
     seconds = Math.round(dateSinceWin / 1000);
@@ -24,6 +30,8 @@
       <p>...dagar sedan bajen vann Allsvenskan.</p>
       <p>Det är alltså <b>{ years } år</b> sedan.</p>
       <p>Eller hela <b>{seconds}</b> sekunder sen. Illa!</p>
+      <p>Tror du på derbyspöken? Det gör bajen. </p>
+      <p>Vraken vann senast över <b>Djurgår'n</b> för <b>{ daysDifWin }</b> dagar sedan!</p>
 </main>
 
 <style>
