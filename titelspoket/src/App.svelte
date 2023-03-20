@@ -35,12 +35,11 @@
       <br />
       <p>Tror du på derbyspöken? Det gör bajen. </p>
       <p>Vraken vann senast över <b>Djurgår'n</b> för <b>{ daysDifWin }</b> dagar sedan!</p>
-      <p><i>*host host*</i> alltså <b>{ yearsDifWin } år</b> sedan.</p>
 </main>
 
 <style>
     .lennarten {
-      height: 20rem;
+      height: 16rem;
     }
 
     p {
@@ -51,7 +50,7 @@
     user-select: none;
     width: 300px;
     margin: auto;
-    margin-top: 23%;
+    margin-top: 10%;
     font-family: 'Anton';
     font-size: 130px;
     text-align: center;
