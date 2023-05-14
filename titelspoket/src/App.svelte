@@ -32,9 +32,6 @@
       <p>...dagar sedan bajen vann Allsvenskan.</p>
       <p>Det är alltså <b>{ years } år</b> sedan.</p>
       <p>Eller hela <b>{seconds}</b> sekunder sen. Illa!</p>
-      <br />
-      <p>Tror du på derbyspöken? Det gör bajen. </p>
-      <p>Vraken vann senast över <b>Djurgår'n</b> för <b>{ daysDifWin }</b> dagar sedan!</p>
 </main>
 
 <style>
