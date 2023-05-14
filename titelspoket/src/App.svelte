@@ -40,7 +40,7 @@
     }
 
     p {
-      font-family: 'Consolas';
+      font-family: 'Georgia';
     }
 
     .main-text {
