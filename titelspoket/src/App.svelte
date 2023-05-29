@@ -1,57 +1,48 @@
-<script lang="ts">
-  import lennarten from './assets/lennarten.png';
-  import heyJude from './assets/heyDif.mp3';
+<script>
+  import Aix from "./routes/aix.svelte";
+  import Vrak from "./routes/vrak.svelte";
 
-  const lastVictory: number = Date.parse("2001-10-21");
-  const lastDifVictory: number = Date.parse("2021-04-04")
-
-  let dateSinceWin: number = Date.now() - lastVictory;
-  let dateSinceDifWin: number = Date.now() - lastDifVictory;
-  let daysDifWin: number = Math.round(dateSinceDifWin / (1000 * 60 * 60 * 24));
-  let yearsDifWin: number = Math.round(daysDifWin / 365);
-  let days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
-  let years = Math.round(days / 365);
-  let seconds = Math.round(dateSinceWin / 1000);
-
-
-  setInterval(() => {
-    dateSinceWin = Date.now() - lastVictory;
-    dateSinceDifWin = Date.now() - lastDifVictory;
-    daysDifWin = Math.round(dateSinceDifWin / (1000 * 60 * 60 * 24))
-    days = Math.round(dateSinceWin / (1000 * 60 * 60 * 24));
-    years = Math.round(days / 365);
-    yearsDifWin = Math.round(daysDifWin / 365);
-    seconds = Math.round(dateSinceWin / 1000);
-  }, 1000);
+  let selectedRoute = 'vrak';
 
 </script>
 
-<main>
-      <img src={lennarten} alt='Lennarts Tröstpris' class="lennarten animated infinite tada delay-2s">
-      <h1 class="main-text">{ days } </h1>
-      <p>...dagar sedan bajen vann Allsvenskan.</p>
-      <p>Det är alltså <b>{ years } år</b> sedan.</p>
-      <p>Eller hela <b>{seconds}</b> sekunder sen. Illa!</p>
-</main>
+<nav>
+  <button id="vrak" on:click={() => selectedRoute = 'vrak'}>🚽</button>
+  <button id="aix" on:click={() => selectedRoute = 'aix'}>🐀</button>
+</nav>
+
+{#if selectedRoute === 'vrak'}
+  <Vrak />
+{:else if selectedRoute === 'aix'}
+  <Aix />
+{/if}
 
 <style>
-    .lennarten {
-      height: 16rem;
-    }
+  nav {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
 
-    p {
-      font-family: 'Georgia';
-    }
+  button {
+    border-radius: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+  }
 
-    .main-text {
-    user-select: none;
-    width: 300px;
-    margin: auto;
-    margin-top: 10%;
-    font-family: 'Anton';
-    font-size: 130px;
-    text-align: center;
-    text-shadow: -1px -1px 0 rgb(255, 255, 255), 1px -1px 0 rgb(255, 255, 255), -1px 1px 0 rgb(255, 255, 255), 1px 1px 0 rgb(255, 255, 255);
-    color: green;
-}
+  #vrak {
+    background-color: #3f9f52;
+    border: 1px solid white;
+  }
+
+  #aix {
+    background-color: #000000;
+    border: 1px solid yellow;
+  }
+
+  button:hover {
+    background-color: #555a64;
+    color: #fff;
+  }
 </style>
