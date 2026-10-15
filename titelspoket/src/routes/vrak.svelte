@@ -65,11 +65,11 @@
     <section class="derby" use:reveal>
       <div class="derby-text">
         <h2>Derbyspöket? Det dog i Södra Djurgårdsstaden.</h2>
-        <p>Hegland satte den. Bajen tittade på.</p>
+        <p>Hegland satte den, bajen tittade på.</p>
         <p><b class="num">{ derbyDays }</b> {derbyDays === 1 ? 'dag' : 'dagar'} sedan. Gör det fortfarande ont?</p>
       </div>
       <p class="score" aria-label="Hammarby 0, Djurgården 1">
-        <span class="side lose"><span class="digit">0</span><span class="team">Bajen</span></span>
+        <span class="side lose"><span class="digit">0</span><span class="team">bajen</span></span>
         <span class="dash">-</span>
         <span class="side"><span class="digit">1</span><span class="team">DIF</span></span>
       </p>
