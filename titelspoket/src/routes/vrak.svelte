@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
     import lennarten from '../assets/lennarten.png';
-    import bluewall from '../assets/bluewall.jpg';
+    import bakgrund from '../assets/derbyvinst.jpg';
 
     const lastVictory: number = Date.parse("2001-10-21");
     const lastDerby: number = Date.parse("2026-10-11");
@@ -48,7 +48,7 @@
   </script>
 
   <main class:ready>
-    <img src={bluewall} alt="" class="wall">
+    <img src={bakgrund} alt="" class="wall">
     <img src={lennarten} alt="Lennarts Tröstpris" class="lennarten">
 
     <div class="count">
@@ -100,7 +100,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(5, 12, 26, 0.62);
+      background: rgba(5, 12, 26, 0.4);
       z-index: -1;
     }
 
