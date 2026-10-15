@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import lennarten from '../assets/lennarten.png';
     import bakgrund from '../assets/derbyvinst.jpg';
 
     const lastVictory: number = Date.parse("2001-10-21");
@@ -33,8 +32,6 @@
       `Hade du aldrig klippt dig hade håret varit ${dec(days / 30.44 * 0.0125)} meter långt nu.`,
       `Under tiden har Atlanten blivit ${Math.round(days / 365.25 * 2.5)} cm bredare.`,
       `Under tiden har ditt hjärta slagit ungefär ${sv(Math.round(days * 1440 * 70 / 1e6))} miljoner slag.`,
-      `Det hade räckt till ${Math.floor(days / 280)} graviditeter i rad.`,
-      `Det hade räckt till ${Math.floor(days / 650)} elefantgraviditeter i rad.`,
       `Under tiden har Djurgården vunnit Allsvenskan 4 gånger.`,
     ];
     const pick = Math.random();
@@ -98,7 +95,7 @@
   <main class:ready class:blam>
     <div class="flash" aria-hidden="true"></div>
     <img src={bakgrund} alt="" class="wall">
-    <img src={lennarten} alt="Lennarts Tröstpris" class="lennarten">
+    <a class="room-link" href="#/pokalrum">Besök bajens pokalrum!</a>
 
     <div class="count">
       <div class="number">
@@ -159,14 +156,24 @@
       z-index: -1;
     }
 
-    .lennarten {
+    .room-link {
       position: absolute;
       top: var(--gutter);
       left: var(--gutter);
-      height: clamp(4.5rem, 12svh, 7rem);
-      width: auto;
-      transform-origin: 50% 90%;
-      animation: grumpy 1s var(--ease-out) 1.8s both;
+      font-family: var(--display);
+      font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-thickness: 0.12em;
+      text-underline-offset: 0.2em;
+      transition: color 0.2s, transform 0.2s var(--ease-out);
+      display: inline-block;
+    }
+
+    .room-link:hover,
+    .room-link:focus-visible {
+      color: var(--ink);
+      transform: translateY(-2px);
     }
 
     h1 {
@@ -282,14 +289,6 @@
       to { transform: scale(1.12) translate3d(-2%, -1%, 0); }
     }
 
-    @keyframes grumpy {
-      0% { transform: rotate(0); }
-      20% { transform: rotate(-7deg); }
-      40% { transform: rotate(6deg); }
-      60% { transform: rotate(-4deg); }
-      80% { transform: rotate(2deg); }
-      100% { transform: rotate(0); }
-    }
 
     @keyframes slap {
       from { opacity: 0; transform: translate3d(0, -30%, 0) rotate(-8deg) scale(1.15); }
@@ -438,7 +437,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .wall, .lennarten, .ready .clipping { animation: none; }
+      .wall, .ready .clipping { animation: none; }
       .count > * { transition: none; }
       main:not(.ready) .count > * { opacity: 1; transform: none; }
     }
