@@ -36,7 +36,6 @@
   }
 
   const bigWeb = web(260);
-  const smallWeb = web(70, 5, 4);
 
   function knock() {
     if (state !== 'standing') return;
@@ -54,7 +53,22 @@
   <svg class="web tl" viewBox="0 0 260 260" aria-hidden="true"><path d={bigWeb} /></svg>
   <svg class="web tr" viewBox="0 0 260 260" aria-hidden="true"><path d={bigWeb} /></svg>
 
-  <div class="spider" aria-hidden="true"><span></span></div>
+  <div class="spider" aria-hidden="true">
+    <svg viewBox="-20 -14 40 34">
+      <g class="legs">
+        <path d="M-3 0 Q-10 -9 -17 -4" />
+        <path d="M-3 2 Q-12 -3 -19 3" />
+        <path d="M-3 4 Q-12 4 -18 11" />
+        <path d="M-3 5 Q-9 10 -13 17" />
+        <path d="M3 0 Q10 -9 17 -4" />
+        <path d="M3 2 Q12 -3 19 3" />
+        <path d="M3 4 Q12 4 18 11" />
+        <path d="M3 5 Q9 10 13 17" />
+      </g>
+      <circle cx="0" cy="-4" r="3" />
+      <ellipse cx="0" cy="5" rx="5" ry="6.5" />
+    </svg>
+  </div>
 
   <div class="floor"></div>
 
@@ -79,7 +93,6 @@
         <span class="dust" aria-hidden="true"></span>
       {:else}
         <img src={lennarten} alt="" class="whole">
-        <svg class="web small" viewBox="0 0 70 70" aria-hidden="true"><path d={smallWeb} /></svg>
       {/if}
     </button>
   </div>
@@ -153,15 +166,25 @@
     animation: dangle 6s ease-in-out infinite;
   }
 
-  .spider span {
+  .spider svg {
     position: absolute;
-    bottom: -0.5rem;
-    left: -0.4rem;
-    width: 0.8rem;
-    height: 1rem;
-    border-radius: 50%;
-    background: #15171b;
-    box-shadow: 0 0 0 1px rgba(220, 225, 235, 0.15);
+    top: 100%;
+    left: -1.75rem;
+    width: 3.5rem;
+    height: auto;
+    translate: 0 -0.4rem;
+    fill: #1c1f24;
+    stroke: rgba(220, 225, 235, 0.35);
+    stroke-width: 0.8;
+  }
+
+  .spider .legs {
+    fill: none;
+    stroke: rgba(200, 205, 215, 0.55);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    transform-origin: 0 2px;
+    animation: wiggle 1.4s ease-in-out infinite;
   }
 
   .floor {
@@ -200,6 +223,7 @@
     cursor: pointer;
     height: min(34svh, 56vw);
     aspect-ratio: 656 / 967;
+    margin-bottom: -2.4svh;
     transform-origin: 50% 100%;
   }
 
@@ -221,14 +245,6 @@
 
   .trophy.standing:hover .whole {
     animation: wobble 0.5s ease-in-out;
-  }
-
-  .web.small {
-    position: absolute;
-    top: 6%;
-    right: -14%;
-    width: 38%;
-    transform: scaleX(-1);
   }
 
   .trophy.falling,
@@ -292,6 +308,11 @@
     50% { transform: scaleY(1) rotate(-1.5deg); }
   }
 
+  @keyframes wiggle {
+    0%, 100% { transform: scaleX(1); }
+    50% { transform: scaleX(0.9); }
+  }
+
   @keyframes flicker {
     0%, 100% { opacity: 1; }
     61% { opacity: 0.55; }
@@ -307,7 +328,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    main::before, .spider { animation: none; }
+    main::before, .spider, .spider .legs { animation: none; }
     .trophy.falling, .trophy.broken { animation-duration: 0.01s; }
     .shard, .shake, .dust { animation-duration: 0.01s; }
   }
