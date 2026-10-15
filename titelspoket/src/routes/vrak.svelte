@@ -1,9 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { fade } from 'svelte/transition';
     import lennarten from '../assets/lennarten.png';
     import bluewall from '../assets/bluewall.jpg';
-    import difVinner from '../assets/difVinner2.jpg';
-    import bajenTorsk from '../assets/bajenTorsk.jpg';
 
     const lastVictory: number = Date.parse("2001-10-21");
     const lastDerby: number = Date.parse("2026-10-11");
@@ -11,6 +10,7 @@
 
     let now: number = Date.now();
     let shown: number | null = null;
+    let ready = false;
 
     $: dateSinceWin = now - lastVictory;
     $: days = Math.round(dateSinceWin / dayMs);
@@ -19,8 +19,19 @@
     $: derbyDays = Math.max(0, Math.floor((now - lastDerby) / dayMs));
     $: counter = shown ?? days;
 
+    // omloppstider: månen 27,32 dagar, Mars 687 dagar, ISS ca 92,9 minuter
+    $: facts = [
+      `Under tiden har månen hunnit runt jorden ${Math.floor(days / 27.32)} gånger.`,
+      `Under tiden har Mars hunnit runt solen ${Math.floor(days / 687)} varv.`,
+      `Under tiden har ISS hunnit runt jorden ${Math.floor(days * 1440 / 92.9).toLocaleString('sv-SE')} gånger.`,
+      `Den som föddes när bajen vann guld fyller ${new Date(now).getFullYear() - 2001} år i år.`,
+    ];
+    let fact = 0;
+
     onMount(() => {
       const timer = setInterval(() => { now = Date.now(); }, 1000);
+      const factTimer = setInterval(() => { fact = (fact + 1) % facts.length; }, 5000);
+      requestAnimationFrame(() => { ready = true; });
 
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
         const start = performance.now();
@@ -32,65 +43,47 @@
         requestAnimationFrame(run);
       }
 
-      return () => clearInterval(timer);
+      return () => { clearInterval(timer); clearInterval(factTimer); };
     });
-
-    function reveal(node: HTMLElement) {
-      document.documentElement.classList.add('js');
-      const io = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) {
-          node.classList.add('in');
-          io.disconnect();
-        }
-      }, { threshold: 0.25 });
-      io.observe(node);
-      return { destroy: () => io.disconnect() };
-    }
   </script>
 
-  <main>
-    <section class="hero" use:reveal>
-      <img src={bluewall} alt="" class="wall">
-      <div class="hero-grid">
-        <div class="count">
-          <h1 aria-label="{days} dagar">{ counter }</h1>
-          <p class="lead">...dagar sedan bajen vann Allsvenskan.</p>
-          <p>Det är alltså <b>{ years } år</b> sedan.</p>
-          <p>Eller hela <b class="num">{ seconds }</b> sekunder sen. Illa!</p>
-        </div>
-        <img src={lennarten} alt="Lennarts Tröstpris" class="lennarten">
-      </div>
-    </section>
+  <main class:ready>
+    <img src={bluewall} alt="" class="wall">
+    <img src={lennarten} alt="Lennarts Tröstpris" class="lennarten">
 
-    <section class="derby" use:reveal>
-      <div class="derby-text">
-        <h2>Derbyspöket? Det dog i Södra Djurgårdsstaden.</h2>
-        <p>Hegland satte den, bajen tittade på.</p>
-        <p><b class="num">{ derbyDays }</b> {derbyDays === 1 ? 'dag' : 'dagar'} sedan. Gör det fortfarande ont?</p>
-      </div>
+    <div class="count">
+      <h1 aria-label="{days} dagar">{ counter }</h1>
+      <p class="lead">...dagar sedan bajen vann Allsvenskan.</p>
+      <p>Det är alltså <b>{ years } år</b> sedan.</p>
+      <p>Eller hela <b class="num">{ seconds }</b> sekunder sen. Illa!</p>
+      {#key fact}
+        <p class="fact" in:fade={{ duration: 400 }}>{ facts[fact] }</p>
+      {/key}
+    </div>
+
+    <article class="clipping">
+      <h2>Senaste nytt från Södra Djurgårdsstaden</h2>
       <p class="score" aria-label="Hammarby 0, Djurgården 1">
         <span class="side lose"><span class="digit">0</span><span class="team">bajen</span></span>
         <span class="dash">-</span>
         <span class="side"><span class="digit">1</span><span class="team">DIF</span></span>
       </p>
-    </section>
-
-    <section class="band" use:reveal>
-      <figure class="big"><img src={difVinner} alt="Djurgården firar mål mot Hammarby" loading="lazy"></figure>
-      <figure><img src={bajenTorsk} alt="Ledsen Hammarbyspelare" loading="lazy"></figure>
-    </section>
+      <p><b class="num">{ derbyDays }</b> {derbyDays === 1 ? 'dag' : 'dagar'} sedan. Gör det fortfarande ont?</p>
+    </article>
   </main>
 
   <style>
-    .hero {
+    main {
       position: relative;
-      min-height: 100svh;
-      display: flex;
-      align-items: flex-end;
-      padding: var(--gutter);
-      padding-bottom: clamp(2rem, 6vw, 5rem);
+      height: 100svh;
       overflow: hidden;
       isolation: isolate;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: var(--gutter);
+      padding: var(--gutter);
+      padding-bottom: clamp(1.5rem, 5svh, 4rem);
     }
 
     .wall {
@@ -103,7 +96,7 @@
       animation: drift 40s ease-in-out infinite alternate;
     }
 
-    .hero::before {
+    main::before {
       content: '';
       position: absolute;
       inset: 0;
@@ -111,90 +104,100 @@
       z-index: -1;
     }
 
-    .hero-grid {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      gap: var(--gutter);
+    .lennarten {
+      position: absolute;
+      top: var(--gutter);
+      left: var(--gutter);
+      height: clamp(4.5rem, 12svh, 7rem);
+      width: auto;
+      transform-origin: 50% 90%;
+      animation: grumpy 1s var(--ease-out) 1.8s both;
     }
 
     h1 {
       font-family: var(--display);
       font-weight: 400;
-      font-size: clamp(9rem, 38vw, 36rem);
+      font-size: min(28vw, 52svh);
       line-height: 0.82;
       letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
       color: var(--bajen);
       margin-left: -0.04em;
-      margin-bottom: clamp(1rem, 2vw, 1.75rem);
+      margin-bottom: clamp(0.75rem, 2svh, 1.5rem);
       user-select: none;
     }
 
     p {
-      font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+      font-size: clamp(1rem, 1.3vw, 1.2rem);
       max-width: 34em;
     }
 
     .lead {
-      font-size: clamp(1.4rem, 2.6vw, 2.25rem);
+      font-size: clamp(1.3rem, 2.4vw, 2rem);
       line-height: 1.2;
       font-style: italic;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     b {
       color: var(--accent);
     }
 
+    .fact {
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-style: italic;
+      min-height: 1.5em;
+    }
+
     .num {
       font-variant-numeric: tabular-nums;
     }
 
-    .lennarten {
-      height: clamp(10rem, 58svh, 36rem);
-      width: auto;
-      transform-origin: 50% 90%;
-      animation: grumpy 1s var(--ease-out) 1.8s both;
-    }
-
-    .derby {
+    /* tidningsurklipp i djurgårdsfärger */
+    .clipping {
+      position: relative;
+      width: min(26rem, 30vw);
+      align-self: center;
       background: var(--field);
       color: var(--field-ink);
-      padding: clamp(5rem, 12vw, 10rem) var(--gutter);
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: clamp(2rem, 6vw, 6rem);
+      padding: 2.25rem 1.75rem 2rem;
+      transform: rotate(2.5deg);
+      clip-path: polygon(
+        0% 1%, 6% 0%, 12% 1.5%, 19% 0.2%, 27% 1.2%, 35% 0%, 44% 1.4%, 52% 0.3%, 61% 1.1%, 70% 0%, 78% 1.5%, 87% 0.4%, 94% 1.2%, 100% 0%,
+        99.2% 20%, 100% 41%, 99.4% 63%, 100% 84%,
+        100% 99%, 93% 100%, 85% 98.6%, 77% 99.8%, 68% 98.8%, 59% 100%, 50% 98.5%, 41% 99.7%, 32% 98.7%, 23% 100%, 14% 98.8%, 6% 99.9%, 0% 98.7%,
+        0.7% 78%, 0% 56%, 0.6% 33%, 0% 12%
+      );
+    }
+
+    .clipping::after {
+      content: '';
+      position: absolute;
+      left: 1.75rem;
+      right: 1.75rem;
+      top: 1rem;
+      height: 0.4rem;
+      background: var(--accent);
     }
 
     h2 {
       font-family: var(--display);
       font-weight: 400;
-      font-size: clamp(2.25rem, 4.6vw, 4.5rem);
+      font-size: clamp(1.75rem, 2.6vw, 2.5rem);
       line-height: 1;
       letter-spacing: -0.01em;
-      max-width: 13em;
-      margin-bottom: 1.5rem;
-    }
-
-    .derby p:not(.score) + p {
-      margin-top: 0.4rem;
-    }
-
-    .derby b {
-      color: inherit;
+      margin-bottom: 1rem;
     }
 
     .score {
       display: flex;
       align-items: flex-start;
-      gap: 0.15em;
+      gap: 0.2em;
       font-family: var(--display);
-      font-size: clamp(9rem, 22vw, 20rem);
+      font-size: clamp(5rem, 14svh, 9rem);
       line-height: 0.85;
-      max-width: none;
+      margin-bottom: 1rem;
     }
 
     .side {
@@ -203,53 +206,20 @@
       align-items: center;
     }
 
-    .lose {
-      color: var(--field-muted);
-    }
-
-    .dash {
+    .lose, .dash {
       color: var(--field-muted);
     }
 
     .team {
       color: var(--field-ink);
       font-family: var(--text);
-      font-size: 1.15rem;
+      font-size: 1rem;
       line-height: 1;
-      margin-top: 0.6rem;
+      margin-top: 0.5rem;
     }
 
-    .band {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 0;
-      background: var(--bg);
-    }
-
-    figure {
-      margin: 0;
-      overflow: hidden;
-      height: clamp(20rem, 42vw, 40rem);
-    }
-
-    figure img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(1.55) contrast(1.05);
-      transition: transform 1.2s var(--ease-out);
-    }
-
-    :global(.js) .band figure img {
-      transform: scale(1.12);
-    }
-
-    :global(.js) .band figure:nth-child(2) img {
-      transition-delay: 120ms;
-    }
-
-    :global(.in) figure img {
-      transform: scale(1) !important;
+    .clipping b {
+      color: inherit;
     }
 
     @keyframes drift {
@@ -266,71 +236,88 @@
       100% { transform: rotate(0); }
     }
 
-    /* entrances, only when script runs */
-    :global(.js) .hero .count > *,
-    :global(.js) .derby .derby-text > *,
-    :global(.js) .derby .score > * {
-      opacity: 0;
-      transform: translate3d(0, 24px, 0);
+    @keyframes slap {
+      from { opacity: 0; transform: translate3d(0, -30%, 0) rotate(-8deg) scale(1.15); }
+      to { opacity: 1; transform: rotate(2.5deg); }
+    }
+
+    .count > * {
       transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
     }
 
-    :global(.js) .derby .score > .side:last-child {
-      transform: translate3d(0, -40%, 0);
-      transition-duration: 0.9s;
+    main:not(.ready) .count > * {
+      opacity: 0;
+      transform: translate3d(0, 24px, 0);
     }
 
-    :global(.in) .count > *,
-    :global(.in) .derby-text > *,
-    :global(.in) .score > * {
-      opacity: 1 !important;
-      transform: none !important;
-    }
+    .count > :nth-child(2) { transition-delay: 80ms; }
+    .count > :nth-child(3) { transition-delay: 160ms; }
 
-    .count > :nth-child(2), .derby-text > :nth-child(2), .score > :nth-child(2) { transition-delay: 80ms; }
-    .count > :nth-child(3), .derby-text > :nth-child(3) { transition-delay: 160ms; }
-    .count > :nth-child(4) { transition-delay: 240ms; }
-    .score > :nth-child(3) { transition-delay: 380ms; }
+    .ready .clipping {
+      animation: slap 0.6s var(--ease-out) 1.2s both;
+    }
 
     @media (max-width: 720px) {
-      .hero-grid {
+      main {
         grid-template-columns: 1fr;
-      }
-
-      .lennarten {
-        grid-row: 1;
-        height: 13rem;
+        grid-template-rows: auto auto;
+        align-content: end;
+        gap: 1.25rem;
       }
 
       h1 {
-        font-size: 44vw;
+        font-size: min(44vw, 30svh);
       }
 
-      .derby {
-        grid-template-columns: 1fr;
+      p {
+        font-size: 0.95rem;
+      }
+
+      .lead {
+        font-size: 1.15rem;
+      }
+
+      .clipping {
+        width: auto;
+        padding: 1.75rem 1.25rem 1.25rem;
+        transform: rotate(-1.5deg);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        column-gap: 1rem;
+        align-items: center;
+      }
+
+      .clipping::after {
+        left: 1.25rem;
+        right: 1.25rem;
+        top: 0.75rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        grid-column: 1 / -1;
+        margin-bottom: 0.5rem;
       }
 
       .score {
-        order: -1;
+        font-size: 4.5rem;
+        margin-bottom: 0;
+        order: 2;
       }
 
-      .band {
-        grid-template-columns: 1fr;
+      .clipping p:last-child {
+        font-size: 0.95rem;
       }
 
-      figure {
-        height: auto;
-        aspect-ratio: 4 / 3;
+      @keyframes slap {
+        from { opacity: 0; transform: translate3d(0, -30%, 0) rotate(-8deg) scale(1.1); }
+        to { opacity: 1; transform: rotate(-1.5deg); }
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .wall, .lennarten { animation: none; }
-      :global(.js) .hero .count > *,
-      :global(.js) .derby .derby-text > *,
-      :global(.js) .derby .score > * {
-        transform: none !important;
-        transition: opacity 0.3s linear;
-      }
+      .wall, .lennarten, .ready .clipping { animation: none; }
+      .count > * { transition: none; }
+      main:not(.ready) .count > * { opacity: 1; transform: none; }
     }
   </style>
