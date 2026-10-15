@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { fade } from 'svelte/transition';
     import lennarten from '../assets/lennarten.png';
     import bakgrund from '../assets/derbyvinst.jpg';
 
@@ -19,46 +18,102 @@
     $: derbyDays = Math.max(0, Math.floor((now - lastDerby) / dayMs));
     $: counter = shown ?? days;
 
-    // omloppstider: månen 27,32 dagar, Mars 687 dagar, ISS ca 92,9 minuter
+    const sv = (n: number) => n.toLocaleString('sv-SE');
+    const dec = (n: number) => n.toLocaleString('sv-SE', { maximumFractionDigits: 1 });
+
+    // månen 27,32 d, Mars 687 d, Jupiter 4 333 d, ISS ca 92,9 min, naglar ca 3,5 mm/mån,
+    // hår ca 1,25 cm/mån, Atlanten ca 2,5 cm/år, vilopuls ca 70 slag/min
     $: facts = [
       `Under tiden har månen hunnit runt jorden ${Math.floor(days / 27.32)} gånger.`,
       `Under tiden har Mars hunnit runt solen ${Math.floor(days / 687)} varv.`,
-      `Under tiden har ISS hunnit runt jorden ${Math.floor(days * 1440 / 92.9).toLocaleString('sv-SE')} gånger.`,
+      `Under tiden har Jupiter hunnit runt solen ${Math.floor(days / 4333)} varv.`,
+      `Under tiden har ISS hunnit runt jorden ${sv(Math.floor(days * 1440 / 92.9))} gånger.`,
       `Den som föddes när bajen vann guld fyller ${new Date(now).getFullYear() - 2001} år i år.`,
+      `Hade du aldrig klippt naglarna hade de varit ${dec(days / 30.44 * 0.0035)} meter långa nu.`,
+      `Hade du aldrig klippt dig hade håret varit ${dec(days / 30.44 * 0.0125)} meter långt nu.`,
+      `Under tiden har Atlanten blivit ${Math.round(days / 365.25 * 2.5)} cm bredare.`,
+      `Under tiden har ditt hjärta slagit ungefär ${sv(Math.round(days * 1440 * 70 / 1e6))} miljoner slag.`,
+      `Det hade räckt till ${Math.floor(days / 280)} graviditeter i rad.`,
+      `Det hade räckt till ${Math.floor(days / 650)} elefantgraviditeter i rad.`,
+      `Under tiden har Djurgården vunnit Allsvenskan 4 gånger.`,
     ];
-    let fact = 0;
+    const pick = Math.random();
+
+    let heat = 0;
+    let blam = false;
+    let sparks: { x: number; y: number; r: number; c: string; d: number }[] = [];
+    const colors = ['#f4c430', '#8ecdf2', '#ffffff', '#c8102e', '#08162b'];
 
     onMount(() => {
       const timer = setInterval(() => { now = Date.now(); }, 1000);
-      const factTimer = setInterval(() => { fact = (fact + 1) % facts.length; }, 5000);
       requestAnimationFrame(() => { ready = true; });
 
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const duration = 2400;
         const start = performance.now();
         const run = (t: number) => {
-          const p = Math.min(1, (t - start) / 1600);
-          shown = p < 1 ? Math.round(days * (1 - Math.pow(1 - p, 4))) : null;
-          if (p < 1) requestAnimationFrame(run);
+          const p = Math.min(1, (t - start) / duration);
+          const eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+          heat = p * p;
+          shown = p < 1 ? Math.round(days * eased) : null;
+          if (p < 1) {
+            requestAnimationFrame(run);
+          } else {
+            heat = 0;
+            boom();
+          }
         };
         requestAnimationFrame(run);
+      } else {
+        shown = null;
       }
 
-      return () => { clearInterval(timer); clearInterval(factTimer); };
+      return () => clearInterval(timer);
     });
+
+    function boom() {
+      sparks = Array.from({ length: 48 }, () => {
+        const a = Math.random() * Math.PI * 2;
+        const dist = 120 + Math.random() * 380;
+        return {
+          x: Math.cos(a) * dist,
+          y: Math.sin(a) * dist - 80,
+          r: Math.random() * 720 - 360,
+          c: colors[Math.floor(Math.random() * colors.length)],
+          d: Math.random() * 120,
+        };
+      });
+      blam = true;
+      navigator.vibrate?.([40, 30, 80]);
+      setTimeout(() => { sparks = []; }, 1600);
+    }
+
+    $: jitter = heat > 0 ? {
+      x: (Math.random() - 0.5) * 14 * heat,
+      y: (Math.random() - 0.5) * 10 * heat,
+      r: (Math.random() - 0.5) * 3 * heat,
+    } : { x: 0, y: 0, r: 0 };
   </script>
 
-  <main class:ready>
+  <main class:ready class:blam>
+    <div class="flash" aria-hidden="true"></div>
     <img src={bakgrund} alt="" class="wall">
     <img src={lennarten} alt="Lennarts Tröstpris" class="lennarten">
 
     <div class="count">
-      <h1 aria-label="{days} dagar">{ counter }</h1>
+      <div class="number">
+        <h1
+          aria-label="{days} dagar"
+          style="--heat: {heat}; transform: translate({jitter.x}px, {jitter.y}px) rotate({jitter.r}deg) scale({1 + heat * 0.12});"
+        >{ counter }</h1>
+        {#each sparks as s}
+          <span class="spark" aria-hidden="true" style="--x: {s.x}px; --y: {s.y}px; --r: {s.r}deg; background: {s.c}; animation-delay: {s.d}ms;"></span>
+        {/each}
+      </div>
       <p class="lead">...dagar sedan bajen vann Allsvenskan.</p>
       <p>Det är alltså <b>{ years } år</b> sedan.</p>
       <p>Eller hela <b class="num">{ seconds }</b> sekunder sen. Illa!</p>
-      {#key fact}
-        <p class="fact" in:fade={{ duration: 400 }}>{ facts[fact] }</p>
-      {/key}
+      <p class="fact">{ facts[Math.floor(pick * facts.length)] }</p>
     </div>
 
     <article class="clipping">
@@ -254,7 +309,74 @@
     .count > :nth-child(3) { transition-delay: 160ms; }
 
     .ready .clipping {
-      animation: slap 0.6s var(--ease-out) 1.2s both;
+      animation: slap 0.6s var(--ease-out) 3s both;
+    }
+
+    .number {
+      position: relative;
+      width: max-content;
+    }
+
+    h1 {
+      transform-origin: 30% 70%;
+      will-change: transform;
+      color: color-mix(in srgb, var(--bajen), #7dff8a calc(var(--heat, 0) * 70%));
+    }
+
+    .blam h1 {
+      animation: punch 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+    }
+
+    .blam {
+      animation: quake 0.45s linear both;
+    }
+
+    .flash {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .blam .flash {
+      animation: flash 0.5s ease-out both;
+    }
+
+    .spark {
+      position: absolute;
+      left: 45%;
+      top: 45%;
+      width: 0.9rem;
+      height: 0.55rem;
+      pointer-events: none;
+      animation: spark 1.3s cubic-bezier(0.15, 0.8, 0.3, 1) both;
+    }
+
+    @keyframes punch {
+      0% { transform: scale(1.35); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes quake {
+      0%, 100% { transform: translate(0, 0); }
+      15% { transform: translate(-12px, 6px); }
+      30% { transform: translate(10px, -8px); }
+      45% { transform: translate(-8px, -4px); }
+      60% { transform: translate(6px, 6px); }
+      75% { transform: translate(-3px, 2px); }
+    }
+
+    @keyframes flash {
+      0% { opacity: 0.55; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes spark {
+      0% { transform: translate(0, 0) rotate(0) scale(1.4); opacity: 1; }
+      70% { opacity: 1; }
+      100% { transform: translate(var(--x), calc(var(--y) + 160px)) rotate(var(--r)) scale(0.6); opacity: 0; }
     }
 
     @media (max-width: 720px) {
